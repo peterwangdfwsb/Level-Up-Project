@@ -1,0 +1,8 @@
+key,level_path,value
+A1_1,1,A-->B | and-->as well as | use and to join common adjectives
+A2_13,1,A-->B | Can use 'even' 'a lot' 'so much' 'slight' to modify comadj | Can use comparative adjectives
+A2_68,1, A-->C | Can use 'by far' to make a superlative adjective stronger | Can use 'the best' before a noun
+A2_58,1,A-->B | Can use 'marvelous' 'awesome' or 'fantastic' to modify noun | Can form a limited range of complex noun
+C2_43,-1,C-->B | Can use 'other than' 'plus' to replace 'In addition' | Can use 'in addition'
+B1_52,-1,B-->A | Can use sth which is adj to replace sth adj | Can use an adjective or adjective phrase after pronouns
+A2_32,1,A-->B | Can use such noun to replace so adj | Can use adverbs of degree (so)

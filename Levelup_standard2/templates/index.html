@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+	  <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+      h3   {color: black;}
+      div.jumbotron{
+      background-color: #ffffff;}
+      div.col-sm-4 {
+      right: -75px;
+      }
+
+      div.col-sm-6 {
+      right: -150px;
+      }
+
+
+      p {
+      position: absolute;
+      left: 150px;
+      top:-50px;
+      }
+
+      #arrowformat_div{
+      position: absolute;
+      left: 75px;
+      top: 45px;
+      }
+
+      #series_chart_div{
+      position: absolute;
+      left: -45px;
+      }
+      </style>
+</head>
+<body>
+
+<div class="jumbotron text-center">
+    <h3>Level Up</h3></div>
+
+
+<div id="container">
+      <div class="col-sm-6">
+      <div id="highlighterContainer">
+          <div id="highlighter"></div>
+      </div>
+      <div id="inputContainer">
+          <textarea type = "text" name="a" placeholder="Enter a Sentence" cols="70" rows="10" wrap="soft"></textarea>
+      </div>
+      </div>
+
+      <div class="col-sm-4">
+          <p>
+              <button class="btn btn-outline-dark" type="submit" id="test">  Analyze  </button>
+              <button class="btn btn-outline-dark" type="button" id="bubble">  Mark  </button>
+              <button class="btn btn-outline-dark" type="button" id="pie">  Statistic  </button>
+          </p>
+
+          <!-- <span id="elements"></span><br> -->
+          <!-- <h3 class="text-muted"></h3> -->
+          <div id="arrowformat_div"></div>
+          <div id="series_chart_div" style="width: 600px; height: 400px;"></div>
+          <div id="piechart_3d" style="width: 600px; height: 400px;"></div>
+      </div>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+
+google.load('visualization', '1.0', {'packages': ['table']});
+//google.charts.setOnLoadCallback(drawTable);
+
+$(document).ready(function() {
+    $("#test").on("click", function() {
+    var form_data = $('textarea[name="a"]').val();
+    var data_json={'text_json':form_data};
+    console.log(data_json);
+
+    $.ajax({
+    url: "/test_1",
+    data: JSON.stringify(data_json),
+    type: "POST",
+    success: function(data) {
+    console.log(data);
+    var cat=data;
+    var Mew=[];
+    var highlight=[];
+    var hugy=Object.keys(cat);
+    for(var i=0;i<Object.keys(cat).length;i++){
+      var tiger=[];
+      tiger.push(hugy[i]);
+      tiger.push(cat[hugy[i]][0]);
+      highlight.push(cat[hugy[i]][0]);
+      tiger.push({v:Number(cat[hugy[i]][1]),f:cat[hugy[i]][2].split(' | ')[0]});
+      tiger.push(cat[hugy[i]][2].split(' | ')[1]);
+      Mew.push(tiger);
+      }
+      console.log(Mew);
+      localStorage.setItem("taiwan", highlight);
+
+    console.log(Mew);
+    drawTable(Mew);
+    }
+    });
+    //drawSeriesChart(draw_data);
+    });
+    });
+
+function drawTable(table) {
+       var data = new google.visualization.DataTable();
+       data.addColumn('string', 'LEVEL');
+       data.addColumn('string', 'DETECTION');
+       data.addColumn('number', 'LEVEL_PATH');
+       data.addColumn('string', 'SUGGESTION');
+       data.addRows(table);
+
+       var table = new google.visualization.Table(document.getElementById('arrowformat_div'));
+       var formatter = new google.visualization.ArrowFormat();
+       formatter.format(data, 2); // Apply formatter to second column
+       table.draw(data, {allowHtml: true, showRowNumber: true});
+      }
+
+
+
+</script>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+
+google.load('visualization', '1.0', {'packages': ['corechart']});
+
+$(document).ready(function() {
+$("#bubble").on("click", function() {
+$( "#arrowformat_div" ).hide();
+$.ajax({
+  url: "/bubble_backend",
+  type: "GET",
+  success: function(data) {
+  var cat=data;
+  var bubble_key=Object.keys(cat);
+  var bubble_level={'A1':1,'A2':2,'B1':3,'B3':4,'C1':5,'C2':6};
+  var bubble_final=[['ID', 'Number', 'Level', 'Description']];
+
+  for(var i=0;i<=bubble_key.length-1;i++){
+  var cache=[];
+  cache.push(bubble_key[i]);
+  cache.push(Number(bubble_key[i].split('_')[1]));
+  cache.push(Number(bubble_level[bubble_key[i].split('_')[0]]));
+  cache.push(cat[bubble_key[i]][2].split(' | ')[2]);
+  bubble_final.push(cache);}
+
+  drawSeriesChart(bubble_final);
+  }
+    });
+      //drawSeriesChart(draw_data);
+      });
+       });
+
+function drawSeriesChart(draw_data) {
+var data = google.visualization.arrayToDataTable(draw_data);
+var options = {
+hAxis: {title: 'Number'},
+vAxis: {title: 'Level'},
+bubble: {textStyle: {fontSize: 11}}
+};
+
+var chart = new google.visualization.BubbleChart(document.getElementById('series_chart_div'));
+chart.draw(data, options);
+}
+
+
+
+</script>
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+
+google.load('visualization', '1.0', {'packages': ['corechart']});
+
+$(document).ready(function() {
+$("#pie").on("click", function() {
+$( "#series_chart_div" ).hide();
+$.ajax({
+  url: "/pie_backend",
+  type: "GET",
+  success: function(data) {
+  var cat=data;
+  var total=Object.keys(cat);
+  var level_pie={'A1':0,'A2':0,'B1':0,'B2':0,'C1':0,'C2':0};
+
+  for(var i=0;i<=total.length-1;i++){
+  if(total[i].split('_')[0]=='A1'){
+  level_pie['A1']+=1;
+  }
+  else if(total[i].split('_')[0]=='A2'){
+  level_pie['A2']+=1;
+  }
+  else if(total[i].split('_')[0]=='B1'){
+  level_pie['B1']+=1;
+  }
+  else if(total[i].split('_')[0]=='B2'){
+  level_pie['B2']+=1;
+  }
+  else if(total[i].split('_')[0]=='C1'){
+  level_pie['C1']+=1;
+  }
+  else if(total[i].split('_')[0]=='C2'){
+  level_pie['C2']+=1;
+  }}
+
+  var pie_key=Object.keys(level_pie);
+  var pie_total=[['Level', 'Number']];
+  for(var i=0;i<=pie_key.length-1;i++){
+  var cache=[];
+  cache.push(pie_key[i]);
+  cache.push(Number(level_pie[pie_key[i]]));
+  pie_total.push(cache);
+  }
+
+
+  drawChart(pie_total);
+  }
+    });
+      //alert("Error);
+      });
+       });
+
+function drawChart(pie_total) {
+var data = google.visualization.arrayToDataTable(pie_total);
+
+var options = {
+is3D: true,
+};
+
+var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+chart.draw(data, options);
+}
+
+</script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script type="text/javascript">
+
+// $("#test").on("click", function()
+      $("#bubble").on("click", function() {
+                var tiger=localStorage.getItem("taiwan");
+                var high_test=tiger.split(",");
+                console.log(tiger);
+                // let's init the plugin, that we called "highlight".
+                // We will highlight the words "hello" and "world",
+                // and set the input area to a widht and height of 500 and 250 respectively.
+                $("#container").highlight({
+                    words:  high_test,
+                    width:  500,
+                    height: 250
+                });
+            });
+
+            // the plugin that would do the trick
+            (function($){
+                $.fn.extend({
+                    highlight: function() {
+                        // the main class
+                        var pluginClass = function() {};
+                        // init the class
+                        // Bootloader
+                        pluginClass.prototype.__init = function (element) {
+                            try {
+                                this.element = element;
+                            } catch (err) {
+                                this.error(err);
+                            }
+                        };
+                        // centralized error handler
+                        pluginClass.prototype.error = function (e) {
+                            // manage error and exceptions here
+                            //console.info("error!",e);
+                        };
+                        // Centralized routing function
+                        pluginClass.prototype.execute = function (fn, options) {
+                            try {
+                                options = $.extend({},options);
+                                if (typeof(this[fn]) == "function") {
+                                    var output = this[fn].apply(this, [options]);
+                                } else {
+                                    this.error("undefined_function");
+                                }
+                            } catch (err) {
+                                this.error(err);
+                            }
+                        };
+                        // **********************
+                        // Plugin Class starts here
+                        // **********************
+                        // init the component
+                        pluginClass.prototype.init = function (options) {
+                            try {
+                                // the element's reference ( $("#container") ) is stored into "this.element"
+                                var scope                   = this;
+                                this.options                = options;
+
+                                // just find the different elements we'll need
+                                this.highlighterContainer   = this.element.find('#highlighterContainer');
+                                this.inputContainer         = this.element.find('#inputContainer');
+                                this.textarea               = this.inputContainer.find('textarea');
+                                this.highlighter            = this.highlighterContainer.find('#highlighter');
+
+                                // apply the css
+                                this.element.css('position','relative');
+
+                                // place both the highlight container and the textarea container
+                                // on the same coordonate to superpose them.
+                                this.highlighterContainer.css({
+                                    'position':         'absolute',
+                                    'left':             '0',
+                                    'top':              '0',
+                                    'border':           '1px dashed #ff0000',
+                                    'width':            this.options.width,
+                                    'height':           this.options.height,
+                                    'cursor':           'text'
+                                });
+                                this.inputContainer.css({
+                                    'position':         'absolute',
+                                    'left':             '0',
+                                    'top':              '0',
+                                    'border':           '1px solid #000000'
+                                });
+                                // now let's make sure the highlit div and the textarea will superpose,
+                                // by applying the same font size and stuffs.
+                                // the highlighter must have a white text so it will be invisible
+                                this.highlighter.css({
+
+                                    'padding':          '7px',
+                                    'color':            '#eeeeee',
+                                    'background-color': '#ffffff',
+                                    'margin':           '0px',
+                                    'font-size':        '11px',
+                                    'font-family':      '"lucida grande",tahoma,verdana,arial,sans-serif'
+                                });
+                                // the textarea must have a transparent background so we can see the highlight div behind it
+                                this.textarea.css({
+                                    'background-color': 'transparent',
+                                    'padding':          '5px',
+                                    'margin':           '0px',
+                                    'font-size':        '11px',
+                                    'width':            this.options.width,
+                                    'height':           this.options.height,
+                                    'font-family':      '"lucida grande",tahoma,verdana,arial,sans-serif'
+                                });
+
+                                // apply the hooks
+                                this.highlighterContainer.bind('click', function() {
+                                    scope.textarea.focus();
+                                });
+                                this.textarea.bind('keyup', function() {
+                                    // when we type in the textarea,
+                                    // we want the text to be processed and re-injected into the div behind it.
+                                    scope.applyText($(this).val());
+                                });
+                            } catch (err) {
+                                this.error(err);
+                            }
+                            return true;
+                        };
+                        pluginClass.prototype.applyText = function (text) {
+                            try {
+                                var scope                   = this;
+
+                                // parse the text:
+                                // replace all the line braks by <br/>, and all the double spaces by the html version &nbsp;
+                                text = this.replaceAll(text,'\n','<br/>');
+                                text = this.replaceAll(text,'  ','&nbsp;&nbsp;');
+
+                                // replace the words by a highlighted version of the words
+                                for (var i=0;i<this.options.words.length;i++) {
+                                    text = this.replaceAll(text,this.options.words[i],'<span style="background-color: #D8DFEA;">'+this.options.words[i]+'</span>');
+                                }
+
+                                // re-inject the processed text into the div
+                                this.highlighter.html(text);
+
+                            } catch (err) {
+                                this.error(err);
+                            }
+                            return true;
+                        };
+                        // "replace all" function
+                        pluginClass.prototype.replaceAll = function(txt, replace, with_this) {
+                            return txt.replace(new RegExp(replace, 'g'),with_this);
+                        }
+
+                        // don't worry about this part, it's just the required code for the plugin to hadle the methods and stuffs. Not relevant here.
+                        //**********************
+                        // process
+                        var fn;
+                        var options;
+                        if (arguments.length == 0) {
+                            fn = "init";
+                            options = {};
+                        } else if (arguments.length == 1 && typeof(arguments[0]) == 'object') {
+                            fn = "init";
+                            options = $.extend({},arguments[0]);
+                        } else {
+                            fn = arguments[0];
+                            options = $.extend({},arguments[1]);
+                        }
+
+                        $.each(this, function(idx, item) {
+                            // if the component is not yet existing, create it.
+                            if ($(item).data('highlightPlugin') == null) {
+                                $(item).data('highlightPlugin', new pluginClass());
+                                $(item).data('highlightPlugin').__init($(item));
+                            }
+                            $(item).data('highlightPlugin').execute(fn, options);
+                        });
+                        return this;
+                    }
+                });
+
+            })(jQuery);
+</script>
+
+</body>
+</html>
