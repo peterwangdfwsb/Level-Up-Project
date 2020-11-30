@@ -20,7 +20,7 @@ We deployed our python code on AWS lambda and connected AWS database to fetch th
 
 3. Create storage in S3
 
-4. Upload python.zip in praat folder to AWS Lambda Layers
+4. Upload python.zip in requirement folder to AWS Lambda Layers
 
 5. Deploy grammar.py on AWS Lambda
 
