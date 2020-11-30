@@ -8,7 +8,7 @@ First, the team focused on python code, especially in grammar detection, to get 
 We already deployed the function on AWS and backed up the code on github. If the function will be attacked on the internet, we will delete it and create the new one at short notice.
 
 # Preliminary Design
-We deployed our python code on AWS lambda and connected AWS database to fetch the our design level up path file. The flow as below:
+We deployed our python code on AWS lambda and connected AWS database to fetch the our level up path graph file. The flow as below:
 
 ![alt text](./FlowChart.png)
 
